@@ -1,0 +1,9 @@
+# Netlify: build from repo root (or point the site at `client` in the UI and use `npm run build` + publish `dist`).
+[build]
+  command = "cd client && npm install && npm run build"
+  publish = "client/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
