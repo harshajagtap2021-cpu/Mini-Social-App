@@ -1,61 +1,98 @@
 # Mini Social Post Application
 
-React + Express + MongoDB mini social feed: signup/login, posts (text and/or image), public feed, likes (with usernames), and comments (with usernames). UI uses Material UI.
+A small social-style app: **signup / login**, **posts** (text and/or image), a **public feed**, **likes** and **comments** with usernames stored in MongoDB. Built with **React (Vite) + Material UI** on the frontend and **Node.js + Express + Mongoose** on the backend.
 
-## Requirements
+---
 
-- Node.js 18+
-- MongoDB running locally or a `MONGODB_URI` connection string
+## Project links
 
-## Setup
+| Resource | URL |
+|----------|-----|
+| **GitHub repository** | [github.com/harshajagtap2021-cpu/Mini-Social-App](https://github.com/harshajagtap2021-cpu/Mini-Social-App) |
+| **Live frontend (Vercel)** | [mini-social-app.vercel.app](https://mini-social-app-topaz.vercel.app/) |
+| **Live backend API (Render)** | [mini-social-app.onrender.com](https://mini-social-app-limz.onrender.com) |
 
-1. Copy `server/.env.example` to `server/.env` and set `JWT_SECRET` (and `MONGODB_URI` if not local).
+---
 
+## Features
+
+- Account creation and login (email + password); passwords hashed with **bcrypt**; **JWT** for API auth  
+- Create posts with optional **text** and/or **image** (at least one required)  
+- Public feed with **cursor-based pagination** (infinite scroll + “Load more”)  
+- Like (toggle) and comment; **usernames** stored for likers and commenters; UI updates from API responses  
+- Responsive UI with reusable components (header, auth layout, post card, composer)
+
+---
+
+## Tech stack
+
+| Layer | Stack |
+|-------|--------|
+| Frontend | React 18, Vite, Material UI, React Router, Axios |
+| Backend | Express, Mongoose, Multer (uploads), jsonwebtoken, cors |
+| Database | MongoDB (Atlas in production) |
+
+---
+
+## Local development
+
+**Requirements:** Node.js 18+, MongoDB (local or Atlas URI).
+
+1. Copy `server/.env.example` → `server/.env` and set `MONGODB_URI` and `JWT_SECRET`.  
 2. Install dependencies:
 
 ```bash
 npm run install:all
 ```
 
-Or: `npm install` in the repo root, then `cd server && npm install`, then `cd ../client && npm install`.
-
-## Run (development)
-
-Start MongoDB, then from the repo root:
+3. Run API + Vite together:
 
 ```bash
 npm run dev
-```
+``` 
 
-- API: [http://127.0.0.1:5000](http://127.0.0.1:5000)
-- App: [http://127.0.0.1:5173](http://127.0.0.1:5173)
-
-The Vite dev server proxies `/api` and `/uploads` to the API.
-
-## Assignment notes
-
-- **Collections:** `users` and `posts` only (Mongoose models `User` and `Post`).
-- **Auth:** JWT in `Authorization: Bearer` header; stored in `localStorage` on the client.
-- **Posts:** Multipart upload for optional image; at least one of text or image is required.
-- **Likes / comments:** Usernames are stored on each post; the feed updates immediately from API responses after like or comment.
-
-### Feed pagination (API)
-
-`GET /api/posts` supports **cursor-based** paging (keyset on `createdAt` + `_id`), not `skip`/`offset`:
-
-- Query: `limit` (default `10`, max `50`), optional `cursor` (opaque string from the previous response).
-- Response: `{ posts, nextCursor, limit }`. When `nextCursor` is `null`, there are no older posts.
-
-The UI loads the first page, then appends older posts via infinite scroll (with a **Load more** fallback button).
-
-## UI / code structure (bonus-oriented)
-
-- MUI theme tuned for spacing, typography, and responsive breakpoints; feed uses `maxWidth="md"` and mobile-friendly stacks.
-- Reusable pieces: `AppHeader`, `AuthLayout`, `ComposePostCard`, `PostCard` (memoized), `FeedSkeleton`.
-- Hooks: `usePaginatedFeed`, `useInfiniteScrollLoad`.
+With **`VITE_API_URL` unset**, the client uses the Vite proxy for `/api` and `/uploads`.
 
 ---
 
-### CORS
+## Environment variables
 
-The API uses `cors` with `origin: true`, so the browser’s `Origin` (your Vercel/Netlify URL) is reflected and allowed. No extra change is required for typical Bearer-token requests.
+### Backend (`server/.env` or Render)
+
+| Variable | Description |
+|----------|-------------|
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret for signing JWTs |
+| `PORT` | Optional locally; **Render sets this automatically** |
+
+### Frontend (Vercel / Netlify)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | Render API origin only, **no trailing slash**, e.g. `https://mini-social-app.onrender.com` |
+
+---
+
+## API notes
+
+- **Auth:** `POST /api/auth/signup`, `POST /api/auth/login` — send `Authorization: Bearer <token>` for protected routes.  
+- **Posts:** `GET /api/posts?limit=10&cursor=...` — cursor-based pagination; `POST /api/posts` (multipart) create; `POST /api/posts/:id/like`, `POST /api/posts/:id/comments`.  
+- **Uploads:** served at `/uploads/...` on the same host as the API.
+
+---
+
+## Repository layout
+
+```
+├── client/          # React (Vite) frontend
+├── server/          # Express API + Mongoose models
+├── package.json     # Root scripts (concurrently dev)
+├── netlify.toml     # Optional Netlify build config
+└── README.md
+```
+
+---
+
+## License
+
+Use for educational / assignment purposes unless you add your own license.
